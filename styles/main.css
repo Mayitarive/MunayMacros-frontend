@@ -1,0 +1,654 @@
+:root {
+  --primary: #00CC99;
+  --primary-dark: #00A077;
+  --primary-light: #66E6C2;
+  --secondary: #FFEE88;
+  --secondary-dark: #FFE855;
+  --secondary-light: #FFF3AA;
+  --alert: #DD1155;
+  --alert-dark: #BB0044;
+  --alert-light: #FF5599;
+  --accent: #FFA987;
+  --accent-dark: #FF8A60;
+  --accent-light: #FFC7B3;
+  --success: #97DB4F;
+  --success-dark: #7BC427;
+  --success-light: #B3E97A;
+  --dark: #343a40;
+  --light: #f8f9fa;
+  --gray: #6c757d;
+  --gray-light: #e9ecef;
+  --transition-speed: 0.3s;
+}
+
+/* Global Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--light);
+  color: var(--dark);
+}
+
+.navbar-dark.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn-success {
+  background-color: var(--success);
+  border-color: var(--success);
+  color: var(--dark);
+}
+
+.btn-success:hover, .btn-success:focus {
+  background-color: var(--success-dark);
+  border-color: var(--success-dark);
+  color: var(--dark);
+}
+
+.section {
+  padding: 80px 0;
+  min-height: 100vh;
+  display: none;
+}
+
+.section.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.section-title {
+  color: var(--primary-dark);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.section-description {
+  color: var(--gray);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Cards and Containers */
+.welcome-card, .profile-card, .daily-card, .history-card, .report-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  transition: transform var(--transition-speed);
+}
+
+.welcome-card:hover, .profile-card:hover, .daily-card:hover, .history-card:hover, .report-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Features on Home Page */
+.features-container {
+  margin: 40px 0;
+}
+
+.feature-card {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  height: 100%;
+  transition: all var(--transition-speed);
+  border-bottom: 4px solid transparent;
+}
+
+.feature-card:hover {
+  border-bottom-color: var(--primary);
+  transform: translateY(-5px);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+
+/* Profile Form */
+.profile-form .form-label {
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 0.25rem rgba(0, 204, 153, 0.25);
+}
+
+.sex-selector {
+  display: flex;
+  gap: 15px;
+}
+
+/* Nutrition Results */
+.nutrition-results {
+  background-color: var(--secondary-light);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 30px;
+}
+
+.results-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--dark);
+}
+
+.nutrient-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.nutrient-card h4 {
+  font-size: 1rem;
+  color: var(--gray);
+  margin-bottom: 10px;
+}
+
+.nutrient-card span {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.nutrient-card span.unit {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--gray);
+  margin-left: 5px;
+}
+
+.nutrient-card.calories {
+  border-top: 4px solid var(--primary);
+}
+
+.nutrient-card.protein {
+  border-top: 4px solid var(--success);
+}
+
+.nutrient-card.carbs {
+  border-top: 4px solid var(--secondary-dark);
+}
+
+.nutrient-card.fat {
+  border-top: 4px solid var(--alert);
+}
+
+/* Daily Tracking */
+.date-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+#current-date, #report-date {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.food-upload-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.upload-counter {
+  font-size: 0.9rem;
+  color: var(--gray);
+  margin-bottom: 15px;
+}
+
+.upload-area {
+  border: 2px dashed var(--gray-light);
+  border-radius: 8px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-speed);
+}
+
+.upload-area:hover {
+  border-color: var(--primary);
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+#upload-placeholder {
+  text-align: center;
+}
+
+.img-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Food Analysis */
+.food-analysis-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
+
+.food-info-card {
+  background-color: var(--secondary-light);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.food-nutrients {
+  background-color: white;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 15px 0;
+}
+
+.portions-input {
+  background-color: white;
+  border-radius: 6px;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+.portions-input .form-control {
+  max-width: 100px;
+  margin: 10px 0;
+}
+
+.portions-input small {
+  display: block;
+  margin-top: 5px;
+}
+
+.nutrient {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.nutrient-name {
+  font-weight: 500;
+}
+
+/* Daily Progress */
+.daily-progress-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.progress-card {
+  margin-bottom: 15px;
+}
+
+.progress {
+  height: 10px;
+  border-radius: 5px;
+}
+
+/* Progress Bar Colors */
+.progress-bar.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.progress-bar.bg-success {
+  background-color: var(--success) !important;
+}
+
+.progress-bar.bg-warning {
+  background-color: var(--secondary-dark) !important;
+}
+
+.progress-bar.bg-danger {
+  background-color: var(--alert) !important;
+}
+
+/* Foods List */
+.foods-list-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.food-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.food-item-name {
+  font-weight: 500;
+}
+
+.food-item-macros {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+.food-item-remove {
+  cursor: pointer;
+  color: var(--alert);
+}
+
+/* Recommendations */
+.recommendations-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
+
+.recommendation-card {
+  background-color: var(--light);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid var(--primary);
+}
+
+.recommendation-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.recommendation-macros {
+  font-size: 0.8rem;
+  color: var(--gray);
+  margin-bottom: 5px;
+}
+
+.recommendation-reason {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--dark);
+}
+
+/* History */
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.calendar-day {
+  border: 1px solid var(--gray-light);
+  border-radius: 6px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.calendar-day:hover {
+  background-color: var(--secondary-light);
+}
+
+.calendar-day.active {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.calendar-day.today {
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+.calendar-day.has-data {
+  background-color: var(--secondary);
+}
+
+.calendar-day.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.calendar-weekday {
+  text-align: center;
+  font-weight: 500;
+  color: var(--gray);
+  margin-bottom: 5px;
+}
+
+.history-details {
+  background-color: var(--light);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.history-summary, .history-foods {
+  background-color: white;
+  border-radius: 8px;
+  padding: 15px;
+  height: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+/* Report */
+.chart-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.daily-summary-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.summary-card {
+  background-color: var(--light);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.summary-header {
+  background-color: var(--primary);
+  color: white;
+  padding: 10px 15px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  font-weight: 600;
+}
+
+.summary-row {
+  padding: 10px 15px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.progress-chart-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
+
+.chart-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.chart-tab {
+  padding: 8px 15px;
+  border-radius: 5px;
+  background-color: var(--light);
+  border: 1px solid var(--gray-light);
+  cursor: pointer;
+  transition: all var(--transition-speed);
+}
+
+.chart-tab.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.report-insight {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
+
+.insight-content {
+  background-color: var(--light);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s forwards;
+}
+
+/* Media Queries */
+@media (max-width: 991.98px) {
+  .section {
+    padding: 60px 0;
+  }
+  
+  .feature-card, .nutrient-card {
+    margin-bottom: 20px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .section {
+    padding: 40px 0;
+  }
+  
+  #current-date, #report-date {
+    font-size: 1.1rem;
+  }
+  
+  .upload-area {
+    height: 160px;
+  }
+  
+  .summary-header, .summary-row {
+    grid-template-columns: 3fr 2fr 2fr 1fr;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .section {
+    padding: 30px 0;
+  }
+  
+  .welcome-card, .profile-card, .daily-card, .history-card, .report-card {
+    padding: 20px;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .feature-icon {
+    font-size: 2rem;
+  }
+  
+  .summary-header, .summary-row {
+    padding: 8px 10px;
+  }
+  
+  .chart-tab {
+    padding: 5px 10px;
+    font-size: 0.9rem;
+  }
+}

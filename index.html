@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MunayMacros Bolivia</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./styles/main.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">MunayMacros</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#home">Inicio</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#profile">Perfil</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#daily">Seguimiento Diario</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#history">Historial</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#report">Reporte</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- App Container -->
+  <div class="app-container">
+    <!-- Home Section -->
+    <section id="home" class="section active">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 text-center">
+            <div class="welcome-card">
+              <h1 class="display-4 mb-4">Bienvenido a MunayMacros</h1>
+              <p class="lead mb-4">Tu asistente personalizado para monitorear tu nutrición diaria con alimentos bolivianos.</p>
+              <div class="features-container mt-5">
+                <div class="row">
+                  <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                      <div class="feature-icon">📊</div>
+                      <h3>Calcula tus Necesidades</h3>
+                      <p>Macronutrientes personalizados según tu perfil</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                      <div class="feature-icon">📷</div>
+                      <h3>Sube tus Comidas</h3>
+                      <p>Detectamos nutrientes automáticamente</p>
+                    </div>
+                  </div>
+                  <div class="col-md-4 mb-4">
+                    <div class="feature-card">
+                      <div class="feature-icon">🥗</div>
+                      <h3>Recomendaciones</h3>
+                      <p>Alimentos bolivianos para tu nutrición</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button id="start-btn" class="btn btn-lg btn-primary mt-4">Comenzar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section id="profile" class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="profile-card">
+              <h2 class="section-title">Datos Personales</h2>
+              <p class="section-description">Ingresa tus datos para calcular tus necesidades nutricionales</p>
+              
+              <form id="profile-form" class="needs-validation" novalidate>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Nombre</label>
+                    <input type="text" class="form-control" id="name" required>
+                    <div class="invalid-feedback">Por favor ingresa tu nombre</div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="age" class="form-label">Edad</label>
+                    <input type="number" class="form-control" id="age" min="15" max="100" required>
+                    <div class="invalid-feedback">Edad válida entre 15-100 años</div>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="weight" class="form-label">Peso (kg)</label>
+                    <input type="number" class="form-control" id="weight" min="30" max="300" step="0.1" required>
+                    <div class="invalid-feedback">Ingresa un peso válido</div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="height" class="form-label">Altura (cm)</label>
+                    <input type="number" class="form-control" id="height" min="100" max="250" required>
+                    <div class="invalid-feedback">Ingresa una altura válida</div>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Sexo</label>
+                    <div class="sex-selector">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sex" id="male" value="male" required>
+                        <label class="form-check-label" for="male">Masculino</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="sex" id="female" value="female" required>
+                        <label class="form-check-label" for="female">Femenino</label>
+                      </div>
+                    </div>
+                  
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="activity" class="form-label">Nivel de Actividad</label>
+                    <select class="form-select" id="activity" required>
+                      <option value="" selected disabled>Selecciona una opción</option>
+                      <option value="1.2">Sedentario (poco o nada de ejercicio)</option>
+                      <option value="1.375">Ligero (ejercicio 1-3 días/semana)</option>
+                      <option value="1.55">Moderado (ejercicio 3-5 días/semana)</option>
+                      <option value="1.725">Activo (ejercicio 6-7 días/semana)</option>
+                      <option value="1.9">Muy activo (ejercicio intenso diario)</option>
+                    </select>
+                    <div class="invalid-feedback">Por favor selecciona tu nivel de actividad</div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-12 mb-3">
+                    <label class="form-label">Objetivo</label>
+                    <div class="goal-selector">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="goal" id="goal-maintain" value="mantener" required>
+                        <label class="form-check-label" for="goal-maintain">Mantener peso</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="goal" id="goal-gain" value="subir" required>
+                        <label class="form-check-label" for="goal-gain">Subir de peso</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="goal" id="goal-lose" value="bajar" required>
+                        <label class="form-check-label" for="goal-lose">Bajar de peso</label>
+                      </div>
+                    </div>
+                    <div class="invalid-feedback">Por favor selecciona tu objetivo</div>
+                  </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                  <button type="submit" class="btn btn-primary">Calcular Necesidades</button>
+                </div>
+              </form>
+              
+              <div id="results" class="nutrition-results mt-4 d-none">
+                <h3 class="results-title">Tus Necesidades Diarias</h3>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="nutrient-card calories">
+                      <h4>Calorías</h4>
+                      <span id="calories-result">0</span>
+                      <span class="unit">kcal</span>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <div class="nutrient-card protein">
+                      <h4>Proteínas</h4>
+                      <span id="protein-result">0</span>
+                      <span class="unit">g</span>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <div class="nutrient-card carbs">
+                      <h4>Carbohidratos</h4>
+                      <span id="carbs-result">0</span>
+                      <span class="unit">g</span>
+                    </div>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <div class="nutrient-card fat">
+                      <h4>Grasas</h4>
+                      <span id="fat-result">0</span>
+                      <span class="unit">g</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-center mt-3">
+                  <button id="continue-to-daily" class="btn btn-success">Continuar al Seguimiento Diario</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Daily Tracking Section -->
+    <section id="daily" class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="daily-card">
+              <h2 class="section-title">Seguimiento Diario</h2>
+              <p class="section-description">Registra tus comidas y monitorea tu progreso</p>
+              
+              <div class="date-display mb-4">
+                <button id="prev-day" class="btn btn-sm btn-outline-primary"><span>&laquo;</span></button>
+                <h3 id="current-date">Hoy, DD/MM/YYYY</h3>
+                <button id="next-day" class="btn btn-sm btn-outline-primary"><span>&raquo;</span></button>
+              </div>
+              
+              <div class="row">
+                <div class="col-lg-7">
+                  <div class="food-upload-container mb-4">
+                    <h4>Subir Imagen de Comida</h4>
+                    <p class="upload-counter">Has subido <span id="upload-count">0</span>/3 comidas hoy</p>
+                    
+                    <div id="upload-area" class="upload-area">
+                      <input type="file" id="food-image" accept="image/*" class="d-none">
+                      <div id="upload-placeholder">
+                        <span class="upload-icon">📷</span>
+                        <p>Haz clic o arrastra una imagen</p>
+                      </div>
+                      <img id="preview-image" class="img-preview d-none" alt="Vista previa">
+                    </div>
+                    
+                    <div id="food-analysis" class="food-analysis-container d-none">
+                      <h4>Análisis de Alimento</h4>
+                      <img id="processed-image" class="d-none img-fluid my-3" alt="Imagen procesada" />
+                      <div id="detections-list" class="my-3"></div>
+                      
+                      <div class="text-center mt-3">
+                        <button id="add-food-btn" class="btn btn-success">Añadir a Mi Día</button>
+                        <button id="cancel-food-btn" class="btn btn-outline-secondary">Cancelar</button>
+                      </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                      <button id="upload-btn" class="btn btn-primary">Subir Imagen</button>
+                    </div>
+                  </div>
+                  
+                  <div class="daily-progress-container">
+                    <h4>Progreso del Día</h4>
+                    <div class="progress-cards">
+                      <div class="progress-card">
+                        <div class="d-flex justify-content-between">
+                          <span>Calorías</span>
+                          <span><span id="calories-current">0</span>/<span id="calories-target">0</span> kcal</span>
+                        </div>
+                        <div class="progress mt-2">
+                          <div id="calories-progress" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
+                        </div>
+                      </div>
+                      <div class="progress-card">
+                        <div class="d-flex justify-content-between">
+                          <span>Proteínas</span>
+                          <span><span id="protein-current">0</span>/<span id="protein-target">0</span> g</span>
+                        </div>
+                        <div class="progress mt-2">
+                          <div id="protein-progress" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                        </div>
+                      </div>
+                      <div class="progress-card">
+                        <div class="d-flex justify-content-between">
+                          <span>Carbohidratos</span>
+                          <span><span id="carbs-current">0</span>/<span id="carbs-target">0</span> g</span>
+                        </div>
+                        <div class="progress mt-2">
+                          <div id="carbs-progress" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                        </div>
+                      </div>
+                      <div class="progress-card">
+                        <div class="d-flex justify-content-between">
+                          <span>Grasas</span>
+                          <span><span id="fat-current">0</span>/<span id="fat-target">0</span> g</span>
+                        </div>
+                        <div class="progress mt-2">
+                          <div id="fat-progress" class="progress-bar bg-danger" role="progressbar" style="width: 0%"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="col-lg-5">
+                  <div class="foods-list-container mt-4">
+                    <h4>Comidas de Hoy</h4>
+                    <ul id="foods-list" class="list-group">
+                      <!-- Food items will be added dynamically -->
+                      <li class="list-group-item text-center text-muted" id="no-foods-message">
+                        No hay comidas registradas para hoy
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="recommendations" class="recommendations-container mt-4 d-none">
+                <h4>Recomendaciones de Alimentos Bolivianos</h4>
+                <p class="recommendations-intro">Basado en tus macronutrientes, te sugerimos:</p>
+                <div id="recommendations-list" class="row">
+                  <!-- Recommendations will be added dynamically -->
+                </div>
+              </div>
+              
+              <div class="text-center mt-4">
+                <button id="view-report-btn" class="btn btn-primary">Ver Reporte Completo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- History Section -->
+    <section id="history" class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="history-card">
+              <h2 class="section-title">Historial</h2>
+              <p class="section-description">Revisa tu progreso de los días anteriores</p>
+              
+              <div class="calendar-container mb-4">
+                <div id="calendar" class="calendar">
+                  <!-- Calendar will be generated by JS -->
+                </div>
+              </div>
+              
+              <div id="history-details" class="history-details d-none">
+                <h4 id="history-date">Fecha seleccionada</h4>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="history-summary">
+                      <h5>Resumen del Día</h5>
+                      <div class="summary-item">
+                        <span>Calorías:</span>
+                        <span id="history-calories">0 kcal</span>
+                      </div>
+                      <div class="summary-item">
+                        <span>Proteínas:</span>
+                        <span id="history-protein">0 g</span>
+                      </div>
+                      <div class="summary-item">
+                        <span>Carbohidratos:</span>
+                        <span id="history-carbs">0 g</span>
+                      </div>
+                      <div class="summary-item">
+                        <span>Grasas:</span>
+                        <span id="history-fat">0 g</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="history-foods">
+                      <h5>Comidas del Día</h5>
+                      <ul id="history-foods-list" class="list-group">
+                        <!-- Historical foods will be added dynamically -->
+                        <li class="list-group-item text-center text-muted">
+                          No hay comidas registradas para este día
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Report Section -->
+    <section id="report" class="section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-10">
+            <div class="report-card">
+              <h2 class="section-title">Reporte Nutricional</h2>
+              <p class="section-description">Análisis completo de tu nutrición</p>
+              
+              <div class="report-date-selector mb-4">
+                <button id="report-prev-day" class="btn btn-sm btn-outline-primary"><span>&laquo;</span></button>
+                <h3 id="report-date">Hoy, DD/MM/YYYY</h3>
+                <button id="report-next-day" class="btn btn-sm btn-outline-primary"><span>&raquo;</span></button>
+              </div>
+              
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="chart-container mb-4">
+                    <h4>Distribución de Macronutrientes</h4>
+                    <canvas id="macros-chart"></canvas>
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="daily-summary-container mb-4">
+                    <h4>Resumen del Día</h4>
+                    <div class="summary-card">
+                      <div class="summary-header">
+                        <span>Nutriente</span>
+                        <span>Consumido</span>
+                        <span>Meta</span>
+                        <span>%</span>
+                      </div>
+                      <div class="summary-row">
+                        <span>Calorías</span>
+                        <span id="summary-calories-current">0</span>
+                        <span id="summary-calories-target">0</span>
+                        <span id="summary-calories-percent">0%</span>
+                      </div>
+                      <div class="summary-row">
+                        <span>Proteínas</span>
+                        <span id="summary-protein-current">0</span>
+                        <span id="summary-protein-target">0</span>
+                        <span id="summary-protein-percent">0%</span>
+                      </div>
+                      <div class="summary-row">
+                        <span>Carbohidratos</span>
+                        <span id="summary-carbs-current">0</span>
+                        <span id="summary-carbs-target">0</span>
+                        <span id="summary-carbs-percent">0%</span>
+                      </div>
+                      <div class="summary-row">
+                        <span>Grasas</span>
+                        <span id="summary-fat-current">0</span>
+                        <span id="summary-fat-target">0</span>
+                        <span id="summary-fat-percent">0%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row">
+                <div class="col-12">
+                  <div class="progress-chart-container">
+                    <h4>Evolución Semanal</h4>
+                    <div class="chart-tabs mb-3">
+                      <button class="chart-tab active" data-nutrient="calories">Calorías</button>
+                      <button class="chart-tab" data-nutrient="protein">Proteínas</button>
+                      <button class="chart-tab" data-nutrient="carbs">Carbohidratos</button>
+                      <button class="chart-tab" data-nutrient="fat">Grasas</button>
+                    </div>
+                    <canvas id="progress-chart"></canvas>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="report-insight mt-4">
+                <h4>Análisis y Sugerencias</h4>
+                <div id="report-insight-content" class="insight-content">
+                  <!-- Insights will be added dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="./scripts/utils.js"></script>
+  <script src="./scripts/storage.js"></script>
+  <script src="./scripts/calculator.js"></script>
+  <script src="./scripts/recommendationService.js"></script>
+  <script src="./scripts/foodUpload.js"></script>
+  <script src="./scripts/recommendations.js"></script>
+  <script src="./scripts/charts.js"></script>
+  <script src="./scripts/app.js"></script>
+</body>
+</html>
