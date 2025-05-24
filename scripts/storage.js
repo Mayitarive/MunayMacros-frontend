@@ -92,7 +92,7 @@ const Storage = {
     }
 
     try {
-      const response = await fetch(`${this.API_URL}/detect`, {
+      const response = await fetch(`${this.API_URL}/detect/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
