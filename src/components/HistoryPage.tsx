@@ -56,7 +56,9 @@ export function HistoryPage({ profile }: Props) {
   };
 
   const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
+    // Create a new Date object to ensure proper state update
+    const newSelectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    setSelectedDate(newSelectedDate);
   };
 
   const handlePreviousMonth = () => {
@@ -81,10 +83,9 @@ export function HistoryPage({ profile }: Props) {
     const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start on Monday
     const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
-    const dateFormat = 'd';
     const rows = [];
     let days = [];
-    let day = startDate;
+    let day = new Date(startDate);
 
     // Weekday headers
     const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
@@ -100,52 +101,53 @@ export function HistoryPage({ profile }: Props) {
 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
-        const formattedDate = format(day, dateFormat);
-        const cloneDay = new Date(day);
-        const dateKey = format(day, 'yyyy-MM-dd');
+        const currentDay = new Date(day); // Create a copy for the current iteration
+        const formattedDate = format(currentDay, 'd');
+        const dateKey = format(currentDay, 'yyyy-MM-dd');
         const hasData = datesWithData.has(dateKey);
-        const isSelected = selectedDate && isSameDay(day, selectedDate);
-        const isToday = isSameDay(day, new Date());
-        const isCurrentMonth = isSameMonth(day, monthStart);
+        const isSelected = selectedDate && isSameDay(currentDay, selectedDate);
+        const isToday = isSameDay(currentDay, new Date());
+        const isCurrentMonth = isSameMonth(currentDay, monthStart);
 
         days.push(
           <button
-            key={day.toString()}
-            onClick={() => handleDateClick(cloneDay)}
+            key={currentDay.toISOString()}
+            onClick={() => handleDateClick(currentDay)}
             disabled={!isCurrentMonth}
             className={`
-              p-2 text-sm rounded-lg transition-all duration-200 relative
+              p-3 text-sm rounded-lg transition-all duration-200 relative min-h-[40px] flex items-center justify-center
               ${!isCurrentMonth 
-                ? 'text-gray-300 cursor-not-allowed' 
+                ? 'text-gray-300 cursor-not-allowed bg-gray-50' 
                 : 'text-gray-700 hover:bg-gray-100 cursor-pointer'
               }
               ${isSelected 
-                ? 'bg-primary text-white hover:bg-primary-dark' 
+                ? 'bg-primary text-white hover:bg-primary-dark shadow-md' 
                 : ''
               }
               ${isToday && !isSelected 
-                ? 'bg-blue-100 text-blue-800 font-semibold' 
+                ? 'bg-blue-100 text-blue-800 font-semibold border-2 border-blue-300' 
                 : ''
               }
-              ${hasData && !isSelected 
-                ? 'bg-green-50 text-green-800 font-medium' 
+              ${hasData && !isSelected && !isToday
+                ? 'bg-green-50 text-green-800 font-medium border border-green-200' 
                 : ''
               }
             `}
           >
-            {formattedDate}
+            <span className="relative z-10">{formattedDate}</span>
             {hasData && (
               <div className={`
-                absolute bottom-1 right-1 w-2 h-2 rounded-full
-                ${isSelected ? 'bg-white' : 'bg-green-500'}
+                absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
+                ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}
               `} />
             )}
           </button>
         );
         day = addDays(day, 1);
       }
+      
       rows.push(
-        <div key={day.toString()} className="grid grid-cols-7 gap-1">
+        <div key={`week-${rows.length}`} className="grid grid-cols-7 gap-1 mb-1">
           {days}
         </div>
       );
@@ -155,7 +157,9 @@ export function HistoryPage({ profile }: Props) {
     return (
       <div>
         {weekdayHeader}
-        {rows}
+        <div className="space-y-1">
+          {rows}
+        </div>
       </div>
     );
   };
@@ -198,19 +202,23 @@ export function HistoryPage({ profile }: Props) {
 
           {renderCalendar()}
 
-          <div className="mt-4 flex flex-wrap gap-4 text-sm">
+          <div className="mt-6 flex flex-wrap gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-100 rounded"></div>
+              <div className="w-4 h-4 bg-blue-100 border-2 border-blue-300 rounded flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
+              </div>
               <span className="text-gray-600">Hoy</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-50 border border-green-200 rounded relative">
+              <div className="w-4 h-4 bg-green-50 border border-green-200 rounded relative flex items-center justify-center">
                 <div className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-green-500 rounded-full"></div>
               </div>
               <span className="text-gray-600">Con registros</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-primary rounded"></div>
+              <div className="w-4 h-4 bg-primary rounded flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+              </div>
               <span className="text-gray-600">Seleccionado</span>
             </div>
           </div>
@@ -231,6 +239,9 @@ export function HistoryPage({ profile }: Props) {
                 <div className="text-center py-12">
                   <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-500 text-lg">No hay registros para esta fecha.</p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Selecciona otra fecha o registra comidas para el día de hoy.
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -304,6 +315,9 @@ export function HistoryPage({ profile }: Props) {
               <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-600 mb-2">Selecciona una fecha</h3>
               <p className="text-gray-500">Haz clic en cualquier día del calendario para ver los registros de esa fecha.</p>
+              <p className="text-gray-400 text-sm mt-2">
+                Los días con un punto verde tienen comidas registradas.
+              </p>
             </div>
           )}
         </div>
