@@ -43,6 +43,17 @@ export async function getDailyLog(userId: number): Promise<DetectedFood[]> {
   return response.json();
 }
 
+export async function getUserHistory(username: string): Promise<DetectedFood[]> {
+  const response = await fetch(`${config.api.baseUrl}/user-history?user=${encodeURIComponent(username)}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Error al obtener el historial del usuario');
+  }
+
+  return response.json();
+}
+
 export async function deleteMeal(logId: string): Promise<void> {
   const response = await fetch(`${config.api.baseUrl}/daily-log/${logId}`, {
     method: 'DELETE',
