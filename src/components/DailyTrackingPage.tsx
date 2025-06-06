@@ -30,14 +30,22 @@ export function DailyTrackingPage({ profile }: Props) {
     fetchRecommendations();
   }, [profile.id]);
 
+  // Filter meals whenever selectedDate changes or allMeals is updated
   useEffect(() => {
     filterMealsByDate();
-  }, [selectedDate, allMeals]);
+  }, [selectedDate]);
+
+  // Filter meals whenever allMeals is updated
+  useEffect(() => {
+    filterMealsByDate();
+  }, [allMeals]);
 
   const fetchUserHistory = async () => {
     try {
+      setLoading(true);
       const data = await getUserHistory(profile.name);
       setAllMeals(data);
+      // filterMealsByDate will be called automatically by the useEffect
     } catch (error) {
       console.error('Error fetching user history:', error);
       toast.error('Error al cargar el historial');
@@ -47,9 +55,20 @@ export function DailyTrackingPage({ profile }: Props) {
   };
 
   const filterMealsByDate = () => {
-    const filteredMeals = allMeals.filter(meal =>
-      isSameDay(selectedDate, parseISO(meal.created_at))
-    );
+    if (!allMeals.length) {
+      setMeals([]);
+      return;
+    }
+
+    const filteredMeals = allMeals.filter(meal => {
+      try {
+        return isSameDay(selectedDate, parseISO(meal.created_at));
+      } catch (error) {
+        console.error('Error parsing date:', meal.created_at, error);
+        return false;
+      }
+    });
+    
     setMeals(filteredMeals);
   };
 
@@ -149,9 +168,11 @@ export function DailyTrackingPage({ profile }: Props) {
         )
       );
 
+      // Refresh the data after registering new meals
       await fetchUserHistory();
       await fetchRecommendations();
 
+      // Reset form state
       setSelectedFile(null);
       setPreviewUrl(null);
       setProcessedImageUrl(null);
