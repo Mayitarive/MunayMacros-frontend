@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { format, startOfDay, parseISO } from 'date-fns';
+import { format, startOfDay, parseISO, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import { Camera, Plus, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -47,12 +47,9 @@ export function DailyTrackingPage({ profile }: Props) {
   };
 
   const filterMealsByDate = () => {
-    // Use startOfDay to normalize both dates to midnight for proper comparison
-    const selectedStart = startOfDay(selectedDate).getTime();
-    const filteredMeals = allMeals.filter(meal => {
-      const mealDate = startOfDay(parseISO(meal.created_at)).getTime();
-      return mealDate === selectedStart;
-    });
+    const filteredMeals = allMeals.filter(meal =>
+      isSameDay(selectedDate, parseISO(meal.created_at))
+    );
     setMeals(filteredMeals);
   };
 
