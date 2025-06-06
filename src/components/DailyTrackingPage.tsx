@@ -47,10 +47,11 @@ export function DailyTrackingPage({ profile }: Props) {
   };
 
   const filterMealsByDate = () => {
-    const selectedDateString = format(selectedDate, 'yyyy-MM-dd');
+    // Use startOfDay to normalize both dates to midnight for proper comparison
+    const selectedStart = startOfDay(selectedDate).getTime();
     const filteredMeals = allMeals.filter(meal => {
-      const mealDate = format(parseISO(meal.created_at), 'yyyy-MM-dd');
-      return mealDate === selectedDateString;
+      const mealDate = startOfDay(parseISO(meal.created_at)).getTime();
+      return mealDate === selectedStart;
     });
     setMeals(filteredMeals);
   };
@@ -71,13 +72,13 @@ export function DailyTrackingPage({ profile }: Props) {
   const goToPreviousDay = () => {
     const previousDay = new Date(selectedDate);
     previousDay.setDate(previousDay.getDate() - 1);
-    setSelectedDate(previousDay);
+    setSelectedDate(startOfDay(previousDay));
   };
 
   const goToNextDay = () => {
     const nextDay = new Date(selectedDate);
     nextDay.setDate(nextDay.getDate() + 1);
-    setSelectedDate(nextDay);
+    setSelectedDate(startOfDay(nextDay));
   };
 
   const goToToday = () => {
