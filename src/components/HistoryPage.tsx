@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, parseISO } from 'date-fns';
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+  isSameMonth,
+  isSameDay,
+  parseISO
+} from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
@@ -29,7 +39,6 @@ export function HistoryPage({ profile }: Props) {
     filterMealsByDate(selectedDate);
   }, [selectedDate, allMeals]);
 
-  // ✅ NUEVO: cambiar selectedDate si ya no está en el mes actual
   useEffect(() => {
     if (!isSameMonth(selectedDate, currentMonth)) {
       const newDate = startOfMonth(currentMonth);
@@ -135,26 +144,20 @@ export function HistoryPage({ profile }: Props) {
             disabled={!isCurrentMonth}
             className={`
               p-3 text-sm rounded-lg transition-all duration-200 relative min-h-[40px] flex items-center justify-center
-              ${!isCurrentMonth 
-                ? 'text-gray-300 cursor-not-allowed bg-gray-50' 
-                : 'text-gray-700 hover:bg-gray-100 cursor-pointer'}
-              ${isSelected 
-                ? 'bg-primary text-white hover:bg-primary-dark shadow-md' 
-                : ''}
-              ${isToday && !isSelected 
-                ? 'bg-blue-100 text-blue-800 font-semibold border-2 border-blue-300' 
-                : ''}
-              ${hasData && !isSelected && !isToday
-                ? 'bg-green-50 text-green-800 font-medium border border-green-200' 
-                : ''}
+              ${!isCurrentMonth ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-700 hover:bg-gray-100 cursor-pointer'}
+              ${isSelected ? 'bg-primary text-white hover:bg-primary-dark shadow-md' : ''}
+              ${isToday && !isSelected ? 'bg-blue-100 text-blue-800 font-semibold border-2 border-blue-300' : ''}
+              ${hasData && !isSelected && !isToday ? 'bg-green-50 text-green-800 font-medium border border-green-200' : ''}
             `}
           >
             <span className="relative z-10">{formattedDate}</span>
             {hasData && (
-              <div className={`
-                absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
-                ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}
-              `} />
+              <div
+                className={`
+                  absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
+                  ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}
+                `}
+              />
             )}
           </button>
         );
@@ -172,9 +175,7 @@ export function HistoryPage({ profile }: Props) {
     return (
       <div>
         {weekdayHeader}
-        <div className="space-y-1">
-          {rows}
-        </div>
+        <div className="space-y-1">{rows}</div>
       </div>
     );
   };
