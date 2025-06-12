@@ -7,10 +7,8 @@ import {
   endOfWeek,
   addDays,
   isSameMonth,
-  isSameDay,
-  parseISO,
+  isSameDay
 } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { UserProfile, DetectedFood } from '../types';
@@ -28,8 +26,6 @@ export function HistoryPage({ profile }: Props) {
   const [selectedDateMeals, setSelectedDateMeals] = useState<DetectedFood[]>([]);
   const [loading, setLoading] = useState(true);
   const [datesWithData, setDatesWithData] = useState<Set<string>>(new Set());
-
-  const timeZone = 'America/La_Paz'; // Ajustado para zona horaria correcta
 
   useEffect(() => {
     fetchUserHistory();
@@ -54,11 +50,9 @@ export function HistoryPage({ profile }: Props) {
       const dates = new Set(
         data.map(meal => {
           try {
-            const utcDate = parseISO(meal.created_at);
-            const localDate = utcToZonedTime(utcDate, timeZone);
-            return format(localDate, 'yyyy-MM-dd');
+            return meal.date;
           } catch (error) {
-            console.error('Error parsing date for calendar:', meal.created_at, error);
+            console.error('Error parsing meal.date for calendar:', meal, error);
             return null;
           }
         }).filter(Boolean) as string[]
@@ -73,16 +67,8 @@ export function HistoryPage({ profile }: Props) {
   };
 
   const filterMealsByDate = (date: Date) => {
-    const filteredMeals = allMeals.filter(meal => {
-      try {
-        const utcDate = parseISO(meal.created_at);
-        const localDate = utcToZonedTime(utcDate, timeZone);
-        return isSameDay(localDate, date);
-      } catch (error) {
-        console.error('Error parsing date for filtering:', meal.created_at, error);
-        return false;
-      }
-    });
+    const targetDateStr = format(date, 'yyyy-MM-dd');
+    const filteredMeals = allMeals.filter(meal => meal.date === targetDateStr);
     setSelectedDateMeals(filteredMeals);
   };
 
@@ -144,10 +130,10 @@ export function HistoryPage({ profile }: Props) {
           >
             <span className="relative z-10">{formattedDate}</span>
             {hasData && (
-              <div className={`
-                absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
-                ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}
-              `} />
+              <div className={
+                `absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
+                ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}`
+              } />
             )}
           </button>
         );
@@ -250,16 +236,7 @@ export function HistoryPage({ profile }: Props) {
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="text-lg font-semibold text-gray-800">{meal.food_name}</h4>
                     <span className="text-sm text-gray-500">
-                      {(() => {
-                        try {
-                          const utcDate = parseISO(meal.created_at);
-                          const localDate = utcToZonedTime(utcDate, timeZone);
-                          return format(localDate, 'HH:mm', { locale: es });
-                        } catch (error) {
-                          console.error('Error formatting time:', meal.created_at, error);
-                          return '--:--';
-                        }
-                      })()}
+                      --:--
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 mb-2">
