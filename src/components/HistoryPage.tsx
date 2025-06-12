@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, parseISO } from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { UserProfile, DetectedFood } from '../types';
@@ -12,20 +13,22 @@ interface Props {
 
 export function HistoryPage({ profile }: Props) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Initialize with current date
   const [allMeals, setAllMeals] = useState<DetectedFood[]>([]);
   const [selectedDateMeals, setSelectedDateMeals] = useState<DetectedFood[]>([]);
   const [loading, setLoading] = useState(true);
   const [datesWithData, setDatesWithData] = useState<Set<string>>(new Set());
+
+  // Get user's timezone
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
     fetchUserHistory();
   }, [profile.name]);
 
   useEffect(() => {
-    if (selectedDate) {
-      filterMealsByDate(selectedDate);
-    }
+    // Always filter meals when selectedDate or allMeals change
+    filterMealsByDate(selectedDate);
   }, [selectedDate, allMeals]);
 
   const fetchUserHistory = async () => {
@@ -33,9 +36,18 @@ export function HistoryPage({ profile }: Props) {
       const data = await getUserHistory(profile.name);
       setAllMeals(data);
       
-      // Create set of dates that have data
+      // Create set of dates that have data, converting UTC to local timezone
       const dates = new Set(
-        data.map(meal => format(parseISO(meal.created_at), 'yyyy-MM-dd'))
+        data.map(meal => {
+          try {
+            const utcDate = parseISO(meal.created_at);
+            const localDate = utcToZonedTime(utcDate, timeZone);
+            return format(localDate, 'yyyy-MM-dd');
+          } catch (error) {
+            console.error('Error parsing date for calendar:', meal.created_at, error);
+            return null;
+          }
+        }).filter(Boolean) as string[]
       );
       setDatesWithData(dates);
     } catch (error) {
@@ -47,10 +59,18 @@ export function HistoryPage({ profile }: Props) {
   };
 
   const filterMealsByDate = (date: Date) => {
-    const selectedDateString = format(date, 'yyyy-MM-dd');
     const filteredMeals = allMeals.filter(meal => {
-      const mealDate = format(parseISO(meal.created_at), 'yyyy-MM-dd');
-      return mealDate === selectedDateString;
+      try {
+        // Parse the UTC timestamp and convert to user's local timezone
+        const utcDate = parseISO(meal.created_at);
+        const localDate = utcToZonedTime(utcDate, timeZone);
+        
+        // Compare the selected date with the meal's local date
+        return isSameDay(date, localDate);
+      } catch (error) {
+        console.error('Error parsing date for filtering:', meal.created_at, error);
+        return false;
+      }
     });
     setSelectedDateMeals(filteredMeals);
   };
@@ -105,7 +125,7 @@ export function HistoryPage({ profile }: Props) {
         const formattedDate = format(currentDay, 'd');
         const dateKey = format(currentDay, 'yyyy-MM-dd');
         const hasData = datesWithData.has(dateKey);
-        const isSelected = selectedDate && isSameDay(currentDay, selectedDate);
+        const isSelected = isSameDay(currentDay, selectedDate);
         const isToday = isSameDay(currentDay, new Date());
         const isCurrentMonth = isSameMonth(currentDay, monthStart);
 
@@ -226,98 +246,94 @@ export function HistoryPage({ profile }: Props) {
 
         {/* Selected Date Details */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          {selectedDate ? (
-            <>
-              <div className="flex items-center gap-2 mb-4">
-                <Calendar className="w-5 h-5 text-primary" />
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {format(selectedDate, "d 'de' MMMM 'de' yyyy", { locale: es })}
-                </h2>
-              </div>
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="w-5 h-5 text-primary" />
+            <h2 className="text-2xl font-bold text-gray-800">
+              {format(selectedDate, "d 'de' MMMM 'de' yyyy", { locale: es })}
+            </h2>
+          </div>
 
-              {selectedDateMeals.length === 0 ? (
-                <div className="text-center py-12">
-                  <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 text-lg">No hay registros para esta fecha.</p>
-                  <p className="text-gray-400 text-sm mt-2">
-                    Selecciona otra fecha o registra comidas para el día de hoy.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                    Comidas registradas ({selectedDateMeals.length})
-                  </h3>
-                  
-                  {selectedDateMeals.map((meal, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="text-lg font-semibold text-gray-800">{meal.food_name}</h4>
-                        <span className="text-sm text-gray-500">
-                          {format(parseISO(meal.created_at), 'HH:mm', { locale: es })}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600 mb-2">
-                        Unidad: {meal.unit} | Porciones: {meal.portions}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div className="text-gray-600">
-                          <span className="font-medium">{meal.calories}</span> kcal
-                        </div>
-                        <div className="text-gray-600">
-                          <span className="font-medium">{meal.protein}g</span> proteínas
-                        </div>
-                        <div className="text-gray-600">
-                          <span className="font-medium">{meal.carbs}g</span> carbohidratos
-                        </div>
-                        <div className="text-gray-600">
-                          <span className="font-medium">{meal.fat}g</span> grasas
-                        </div>
-                      </div>
+          {selectedDateMeals.length === 0 ? (
+            <div className="text-center py-12">
+              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">No hay registros para esta fecha.</p>
+              <p className="text-gray-400 text-sm mt-2">
+                Selecciona otra fecha o registra comidas para el día de hoy.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-700 mb-4">
+                Comidas registradas ({selectedDateMeals.length})
+              </h3>
+              
+              {selectedDateMeals.map((meal, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="text-lg font-semibold text-gray-800">{meal.food_name}</h4>
+                    <span className="text-sm text-gray-500">
+                      {(() => {
+                        try {
+                          const utcDate = parseISO(meal.created_at);
+                          const localDate = utcToZonedTime(utcDate, timeZone);
+                          return format(localDate, 'HH:mm', { locale: es });
+                        } catch (error) {
+                          console.error('Error formatting time:', meal.created_at, error);
+                          return '--:--';
+                        }
+                      })()}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-2">
+                    Unidad: {meal.unit} | Porciones: {meal.portions}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="text-gray-600">
+                      <span className="font-medium">{meal.calories}</span> kcal
                     </div>
-                  ))}
-
-                  {/* Daily Summary */}
-                  <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 mb-2">Resumen del día</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="text-center">
-                        <div className="font-bold text-blue-900">
-                          {selectedDateMeals.reduce((sum, meal) => sum + meal.calories, 0).toFixed(0)}
-                        </div>
-                        <div className="text-blue-700">kcal totales</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-bold text-blue-900">
-                          {selectedDateMeals.reduce((sum, meal) => sum + meal.protein, 0).toFixed(1)}g
-                        </div>
-                        <div className="text-blue-700">proteínas</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-bold text-blue-900">
-                          {selectedDateMeals.reduce((sum, meal) => sum + meal.carbs, 0).toFixed(1)}g
-                        </div>
-                        <div className="text-blue-700">carbohidratos</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="font-bold text-blue-900">
-                          {selectedDateMeals.reduce((sum, meal) => sum + meal.fat, 0).toFixed(1)}g
-                        </div>
-                        <div className="text-blue-700">grasas</div>
-                      </div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">{meal.protein}g</span> proteínas
+                    </div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">{meal.carbs}g</span> carbohidratos
+                    </div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">{meal.fat}g</span> grasas
                     </div>
                   </div>
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-12">
-              <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">Selecciona una fecha</h3>
-              <p className="text-gray-500">Haz clic en cualquier día del calendario para ver los registros de esa fecha.</p>
-              <p className="text-gray-400 text-sm mt-2">
-                Los días con un punto verde tienen comidas registradas.
-              </p>
+              ))}
+
+              {/* Daily Summary */}
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-semibold text-blue-800 mb-2">Resumen del día</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="text-center">
+                    <div className="font-bold text-blue-900">
+                      {selectedDateMeals.reduce((sum, meal) => sum + meal.calories, 0).toFixed(0)}
+                    </div>
+                    <div className="text-blue-700">kcal totales</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-bold text-blue-900">
+                      {selectedDateMeals.reduce((sum, meal) => sum + meal.protein, 0).toFixed(1)}g
+                    </div>
+                    <div className="text-blue-700">proteínas</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-bold text-blue-900">
+                      {selectedDateMeals.reduce((sum, meal) => sum + meal.carbs, 0).toFixed(1)}g
+                    </div>
+                    <div className="text-blue-700">carbohidratos</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-bold text-blue-900">
+                      {selectedDateMeals.reduce((sum, meal) => sum + meal.fat, 0).toFixed(1)}g
+                    </div>
+                    <div className="text-blue-700">grasas</div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
