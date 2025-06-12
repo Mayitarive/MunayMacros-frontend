@@ -29,7 +29,7 @@ export function HistoryPage({ profile }: Props) {
   const [loading, setLoading] = useState(true);
   const [datesWithData, setDatesWithData] = useState<Set<string>>(new Set());
 
-  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const timeZone = 'America/La_Paz'; // Ajustado para zona horaria correcta
 
   useEffect(() => {
     fetchUserHistory();
@@ -77,7 +77,7 @@ export function HistoryPage({ profile }: Props) {
       try {
         const utcDate = parseISO(meal.created_at);
         const localDate = utcToZonedTime(utcDate, timeZone);
-        return isSameDay(date, localDate);
+        return isSameDay(localDate, date);
       } catch (error) {
         console.error('Error parsing date for filtering:', meal.created_at, error);
         return false;
@@ -87,26 +87,15 @@ export function HistoryPage({ profile }: Props) {
   };
 
   const handleDateClick = (date: Date) => {
-    const newSelected = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    if (!isSameDay(selectedDate, newSelected)) {
-      setSelectedDate(newSelected);
-    }
+    setSelectedDate(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
   };
 
   const handlePreviousMonth = () => {
-    setCurrentMonth(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() - 1);
-      return newDate;
-    });
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1));
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth(prev => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + 1);
-      return newDate;
-    });
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1));
   };
 
   const renderCalendar = () => {
