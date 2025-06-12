@@ -92,7 +92,7 @@ export function HistoryPage({ profile }: Props) {
 
     const rows = [];
     let days = [];
-    let day = new Date(startDate);
+    let currentDay = new Date(startDate);
 
     const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     const weekdayHeader = (
@@ -105,15 +105,13 @@ export function HistoryPage({ profile }: Props) {
       </div>
     );
 
-    while (day <= endDate) {
+    while (currentDay <= endDate) {
       for (let i = 0; i < 7; i++) {
-        const currentDay = new Date(day);
-        const formattedDate = format(currentDay, 'd');
         const dateKey = format(currentDay, 'yyyy-MM-dd');
-        const hasData = datesWithData.has(dateKey);
         const isSelected = isSameDay(currentDay, selectedDate);
         const isToday = isSameDay(currentDay, new Date());
-        const isCurrentMonth = isSameMonth(currentDay, monthStart);
+        const isCurrentMonth = isSameMonth(currentDay, currentMonth);
+        const hasData = datesWithData.has(dateKey);
 
         days.push(
           <button
@@ -128,16 +126,15 @@ export function HistoryPage({ profile }: Props) {
               ${hasData && !isSelected && !isToday ? 'bg-green-50 text-green-800 font-medium border border-green-200' : ''}`
             }
           >
-            <span className="relative z-10">{formattedDate}</span>
+            <span className="relative z-10">{format(currentDay, 'd')}</span>
             {hasData && (
-              <div className={
-                `absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
-                ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}`
-              } />
+              <div className={`absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
+                ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}`} />
             )}
           </button>
         );
-        day = addDays(day, 1);
+
+        currentDay = addDays(currentDay, 1);
       }
 
       rows.push(
@@ -151,9 +148,7 @@ export function HistoryPage({ profile }: Props) {
     return (
       <div>
         {weekdayHeader}
-        <div className="space-y-1">
-          {rows}
-        </div>
+        <div className="space-y-1">{rows}</div>
       </div>
     );
   };
