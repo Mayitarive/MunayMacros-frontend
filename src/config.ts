@@ -12,7 +12,8 @@ export const config = {
       profile: '/profile',
       dailyLog: '/daily-log',
       detect: '/detect',
-      recommendations: '/recommendations'
+      recommendations: '/recommendations',
+      userHistory: '/user-history' // 
     }
   }
 };

@@ -551,7 +551,7 @@ export function DailyTrackingPage({ profile }: Props) {
                 {meals.map((meal, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-800">{meal.food_name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">{meal.name}</h3>
                       <span className="text-sm text-gray-500">
                         {format(parseISO(meal.created_at), 'HH:mm', { locale: es })}
                       </span>

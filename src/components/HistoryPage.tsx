@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  addDays,
-  isSameMonth,
-  isSameDay
-} from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, parseISO } from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { UserProfile, DetectedFood } from '../types';
@@ -21,38 +13,38 @@ interface Props {
 
 export function HistoryPage({ profile }: Props) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Initialize with current date
   const [allMeals, setAllMeals] = useState<DetectedFood[]>([]);
   const [selectedDateMeals, setSelectedDateMeals] = useState<DetectedFood[]>([]);
   const [loading, setLoading] = useState(true);
   const [datesWithData, setDatesWithData] = useState<Set<string>>(new Set());
+
+  // Get user's timezone
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   useEffect(() => {
     fetchUserHistory();
   }, [profile.name]);
 
   useEffect(() => {
+    // Always filter meals when selectedDate or allMeals change
     filterMealsByDate(selectedDate);
   }, [selectedDate, allMeals]);
-
-  useEffect(() => {
-    if (!isSameMonth(selectedDate, currentMonth)) {
-      const newDate = startOfMonth(currentMonth);
-      setSelectedDate(newDate);
-    }
-  }, [currentMonth]);
 
   const fetchUserHistory = async () => {
     try {
       const data = await getUserHistory(profile.name);
       setAllMeals(data);
-
+      
+      // Create set of dates that have data, converting UTC to local timezone
       const dates = new Set(
         data.map(meal => {
           try {
-            return meal.date;
+            const utcDate = parseISO(meal.created_at);
+            const localDate = utcToZonedTime(utcDate, timeZone);
+            return format(localDate, 'yyyy-MM-dd');
           } catch (error) {
-            console.error('Error parsing meal.date for calendar:', meal, error);
+            console.error('Error parsing date for calendar:', meal.created_at, error);
             return null;
           }
         }).filter(Boolean) as string[]
@@ -68,32 +60,56 @@ export function HistoryPage({ profile }: Props) {
 
   const filterMealsByDate = (date: Date) => {
     const targetDateStr = format(date, 'yyyy-MM-dd');
-    const filteredMeals = allMeals.filter(meal => meal.date === targetDateStr);
+
+    const filteredMeals = allMeals.filter(meal => {
+      try {
+        const utcDate = parseISO(meal.created_at);
+        const localDate = utcToZonedTime(utcDate, timeZone);
+        const localDateStr = format(localDate, 'yyyy-MM-dd');
+
+        return targetDateStr === localDateStr;
+      } catch (error) {
+        console.error('Error parsing date for filtering:', meal.created_at, error);
+        return false;
+      }
+    });
+
     setSelectedDateMeals(filteredMeals);
   };
 
   const handleDateClick = (date: Date) => {
-    setSelectedDate(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+    // Create a new Date object to ensure proper state update
+    const newSelectedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    setSelectedDate(newSelectedDate);
   };
 
   const handlePreviousMonth = () => {
-    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1));
+    setCurrentMonth(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() - 1);
+      return newDate;
+    });
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1));
+    setCurrentMonth(prev => {
+      const newDate = new Date(prev);
+      newDate.setMonth(prev.getMonth() + 1);
+      return newDate;
+    });
   };
 
   const renderCalendar = () => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 1 }); // Start on Monday
     const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
     const rows = [];
     let days = [];
-    let currentDay = new Date(startDate);
+    let day = new Date(startDate);
 
+    // Weekday headers
     const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     const weekdayHeader = (
       <div key="weekdays" className="grid grid-cols-7 gap-1 mb-2">
@@ -105,38 +121,53 @@ export function HistoryPage({ profile }: Props) {
       </div>
     );
 
-    while (currentDay <= endDate) {
+    while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
+        const currentDay = new Date(day); // Create a copy for the current iteration
+        const formattedDate = format(currentDay, 'd');
         const dateKey = format(currentDay, 'yyyy-MM-dd');
+        const hasData = datesWithData.has(dateKey);
         const isSelected = isSameDay(currentDay, selectedDate);
         const isToday = isSameDay(currentDay, new Date());
-        const isCurrentMonth = isSameMonth(currentDay, currentMonth);
-        const hasData = datesWithData.has(dateKey);
+        const isCurrentMonth = isSameMonth(currentDay, monthStart);
 
         days.push(
           <button
             key={currentDay.toISOString()}
             onClick={() => handleDateClick(currentDay)}
             disabled={!isCurrentMonth}
-            className={
-              `p-3 text-sm rounded-lg transition-all duration-200 relative min-h-[40px] flex items-center justify-center
-              ${!isCurrentMonth ? 'text-gray-300 cursor-not-allowed bg-gray-50' : 'text-gray-700 hover:bg-gray-100 cursor-pointer'}
-              ${isSelected ? 'bg-primary text-white hover:bg-primary-dark shadow-md' : ''}
-              ${isToday && !isSelected ? 'bg-blue-100 text-blue-800 font-semibold border-2 border-blue-300' : ''}
-              ${hasData && !isSelected && !isToday ? 'bg-green-50 text-green-800 font-medium border border-green-200' : ''}`
-            }
+            className={`
+              p-3 text-sm rounded-lg transition-all duration-200 relative min-h-[40px] flex items-center justify-center
+              ${!isCurrentMonth 
+                ? 'text-gray-300 cursor-not-allowed bg-gray-50' 
+                : 'text-gray-700 hover:bg-gray-100 cursor-pointer'
+              }
+              ${isSelected 
+                ? 'bg-primary text-white hover:bg-primary-dark shadow-md' 
+                : ''
+              }
+              ${isToday && !isSelected 
+                ? 'bg-blue-100 text-blue-800 font-semibold border-2 border-blue-300' 
+                : ''
+              }
+              ${hasData && !isSelected && !isToday
+                ? 'bg-green-50 text-green-800 font-medium border border-green-200' 
+                : ''
+              }
+            `}
           >
-            <span className="relative z-10">{format(currentDay, 'd')}</span>
+            <span className="relative z-10">{formattedDate}</span>
             {hasData && (
-              <div className={`absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
-                ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}`} />
+              <div className={`
+                absolute bottom-1 right-1 w-2 h-2 rounded-full z-20
+                ${isSelected ? 'bg-white' : isToday ? 'bg-blue-600' : 'bg-green-500'}
+              `} />
             )}
           </button>
         );
-
-        currentDay = addDays(currentDay, 1);
+        day = addDays(day, 1);
       }
-
+      
       rows.push(
         <div key={`week-${rows.length}`} className="grid grid-cols-7 gap-1 mb-1">
           {days}
@@ -148,7 +179,9 @@ export function HistoryPage({ profile }: Props) {
     return (
       <div>
         {weekdayHeader}
-        <div className="space-y-1">{rows}</div>
+        <div className="space-y-1">
+          {rows}
+        </div>
       </div>
     );
   };
@@ -164,17 +197,26 @@ export function HistoryPage({ profile }: Props) {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Calendar Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-800">Calendario</h2>
             <div className="flex items-center gap-2">
-              <button onClick={handlePreviousMonth} className="p-2 rounded-md bg-gray-100 hover:bg-gray-200">
+              <button
+                onClick={handlePreviousMonth}
+                className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+                title="Mes anterior"
+              >
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <h3 className="text-lg font-semibold text-gray-700 min-w-[200px] text-center">
                 {format(currentMonth, "MMMM 'de' yyyy", { locale: es })}
               </h3>
-              <button onClick={handleNextMonth} className="p-2 rounded-md bg-gray-100 hover:bg-gray-200">
+              <button
+                onClick={handleNextMonth}
+                className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 transition-colors"
+                title="Mes siguiente"
+              >
                 <ChevronRight className="w-5 h-5" />
               </button>
             </div>
@@ -204,6 +246,7 @@ export function HistoryPage({ profile }: Props) {
           </div>
         </div>
 
+        {/* Selected Date Details */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-5 h-5 text-primary" />
@@ -225,27 +268,45 @@ export function HistoryPage({ profile }: Props) {
               <h3 className="text-lg font-semibold text-gray-700 mb-4">
                 Comidas registradas ({selectedDateMeals.length})
               </h3>
-
+              
               {selectedDateMeals.map((meal, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="text-lg font-semibold text-gray-800">{meal.food_name}</h4>
+                    <h4 className="text-lg font-semibold text-gray-800">{meal.name}</h4>
                     <span className="text-sm text-gray-500">
-                      --:--
+                      {(() => {
+                        try {
+                          const utcDate = parseISO(meal.created_at);
+                          const localDate = utcToZonedTime(utcDate, timeZone);
+                          return format(localDate, 'HH:mm', { locale: es });
+                        } catch (error) {
+                          console.error('Error formatting time:', meal.created_at, error);
+                          return '--:--';
+                        }
+                      })()}
                     </span>
                   </div>
                   <div className="text-sm text-gray-600 mb-2">
                     Unidad: {meal.unit} | Porciones: {meal.portions}
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="text-gray-600"><span className="font-medium">{meal.calories}</span> kcal</div>
-                    <div className="text-gray-600"><span className="font-medium">{meal.protein}g</span> proteínas</div>
-                    <div className="text-gray-600"><span className="font-medium">{meal.carbs}g</span> carbohidratos</div>
-                    <div className="text-gray-600"><span className="font-medium">{meal.fat}g</span> grasas</div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">{meal.calories}</span> kcal
+                    </div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">{meal.protein}g</span> proteínas
+                    </div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">{meal.carbs}g</span> carbohidratos
+                    </div>
+                    <div className="text-gray-600">
+                      <span className="font-medium">{meal.fat}g</span> grasas
+                    </div>
                   </div>
                 </div>
               ))}
 
+              {/* Daily Summary */}
               <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                 <h4 className="font-semibold text-blue-800 mb-2">Resumen del día</h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
