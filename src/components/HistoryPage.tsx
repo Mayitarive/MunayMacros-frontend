@@ -59,11 +59,14 @@ export function HistoryPage({ profile }: Props) {
   }, [profile.name]);
 
   useEffect(() => {
-    // Always filter meals when selectedDate changes
+    // ✅ AQUÍ ESTÁ LA CORRECCIÓN: Llamar directamente a getMealsForHistory
     if (selectedDate) {
-      filterMealsBySelectedDate(selectedDate);
+      const dateKey = format(selectedDate, 'yyyy-MM-dd');
+      getMealsForHistory(profile.name, dateKey).then(meals => {
+        setSelectedDateMeals(meals);
+      });
     }
-  }, [selectedDate]);
+  }, [selectedDate, profile.name]);
 
   const fetchUserHistory = async () => {
     try {
@@ -97,15 +100,6 @@ export function HistoryPage({ profile }: Props) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const filterMealsBySelectedDate = async (date: Date) => {
-    // Convert selected date to YYYY-MM-DD format
-    const dateKey = format(date, 'yyyy-MM-dd');
-    
-    // Use the auxiliary function to get meals for this specific date
-    const mealsForDate = await getMealsForHistory(profile.name, dateKey);
-    setSelectedDateMeals(mealsForDate);
   };
 
   const handleDateClick = (date: Date) => {
