@@ -11,7 +11,7 @@ interface Props {
   profile: UserProfile;
 }
 
-// Función auxiliar exclusiva para el historial
+// ✅ Función auxiliar exclusiva para el historial
 async function getMealsForHistory(username: string, dateKey: string): Promise<DetectedFood[]> {
   try {
     const response = await fetch(
@@ -25,7 +25,7 @@ async function getMealsForHistory(username: string, dateKey: string): Promise<De
 
     const allMeals = await response.json();
 
-    // Filtrar por fecha usando formato YYYY-MM-DD
+    // ✅ Filtrar por fecha usando formato YYYY-MM-DD
     return allMeals.filter((meal: DetectedFood) => {
       try {
         // Convertir UTC a fecha local y extraer solo la fecha
@@ -45,7 +45,7 @@ async function getMealsForHistory(username: string, dateKey: string): Promise<De
 
 export function HistoryPage({ profile }: Props) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Initialize with current date
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [allMeals, setAllMeals] = useState<DetectedFood[]>([]);
   const [selectedDateMeals, setSelectedDateMeals] = useState<DetectedFood[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,8 +58,8 @@ export function HistoryPage({ profile }: Props) {
     fetchUserHistory();
   }, [profile.name]);
 
+  // ✅ CORRECCIÓN PRINCIPAL: Usar getMealsForHistory cuando cambie selectedDate
   useEffect(() => {
-    // ✅ AQUÍ ESTÁ LA CORRECCIÓN: Llamar directamente a getMealsForHistory
     if (selectedDate) {
       const dateKey = format(selectedDate, 'yyyy-MM-dd');
       getMealsForHistory(profile.name, dateKey).then(meals => {
@@ -70,6 +70,7 @@ export function HistoryPage({ profile }: Props) {
 
   const fetchUserHistory = async () => {
     try {
+      // ✅ Llamar directamente al endpoint /user-history
       const response = await fetch(`${config.api.baseUrl}/user-history?user=${encodeURIComponent(profile.name)}`);
       
       if (!response.ok) {
