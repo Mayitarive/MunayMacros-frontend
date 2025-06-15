@@ -30,9 +30,9 @@ export function DailyTrackingPage({ profile }: Props) {
   useEffect(() => {
     fetchUserHistory();
     fetchRecommendations();
-  }, [profile.name]); // Changed from profile.id to profile.name
+  }, [profile.name]);
 
-  // Filter meals whenever selectedDate changes
+  // Filter meals whenever selectedDate or allMeals changes
   useEffect(() => {
     filterMealsByDate();
   }, [selectedDate, allMeals]);

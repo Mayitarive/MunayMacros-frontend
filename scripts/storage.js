@@ -1,3 +1,5 @@
+import Utils from './utils.js';
+
 /**
  * Storage management for the application
  * Uses both localStorage and backend API
@@ -99,7 +101,7 @@ const Storage = {
         },
         body: JSON.stringify({
           user: username,
-          food_name: foodItem.name,
+          food_name: foodItem.food_name,
           calories: foodItem.calories,
           protein: foodItem.protein,
           carbs: foodItem.carbs,
@@ -140,16 +142,11 @@ const Storage = {
 
       const allMeals = await response.json();
 
-      // Filtrar por fecha exacta y mapear food_name a name
-      return allMeals
-        .filter(meal => {
-          const mealDate = new Date(meal.created_at).toISOString().split('T')[0];
-          return mealDate === dateKey;
-        })
-        .map(meal => ({
-          ...meal,
-          name: meal.food_name
-        }));
+      // Filtrar por fecha exacta - SIN mapear food_name a name
+      return allMeals.filter(meal => {
+        const mealDate = new Date(meal.created_at).toISOString().split('T')[0];
+        return mealDate === dateKey;
+      });
 
     } catch (error) {
       console.error('Error fetching filtered meals:', error);
@@ -274,3 +271,5 @@ const Storage = {
     return storedDate;
   }
 };
+
+export default Storage;

@@ -13,7 +13,7 @@ interface Props {
 
 export function HistoryPage({ profile }: Props) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // Initialize with current date
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [allMeals, setAllMeals] = useState<DetectedFood[]>([]);
   const [selectedDateMeals, setSelectedDateMeals] = useState<DetectedFood[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,6 @@ export function HistoryPage({ profile }: Props) {
   }, [profile.name]);
 
   useEffect(() => {
-    // Always filter meals when selectedDate or allMeals change
     filterMealsByDate(selectedDate);
   }, [selectedDate, allMeals]);
 
