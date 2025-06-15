@@ -4,11 +4,43 @@ import { utcToZonedTime } from 'date-fns-tz';
 import { es } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { UserProfile, DetectedFood } from '../types';
-import { getUserHistory } from '../services/api';
 import toast from 'react-hot-toast';
+import { config } from '../config';
 
 interface Props {
   profile: UserProfile;
+}
+
+// Función auxiliar exclusiva para el historial
+async function getMealsForHistory(username: string, dateKey: string): Promise<DetectedFood[]> {
+  try {
+    const response = await fetch(
+      `${config.api.baseUrl}/user-history?user=${encodeURIComponent(username)}`
+    );
+
+    if (!response.ok) {
+      console.error('Error fetching user history:', response.statusText);
+      return [];
+    }
+
+    const allMeals = await response.json();
+
+    // Filtrar por fecha usando formato YYYY-MM-DD
+    return allMeals.filter((meal: DetectedFood) => {
+      try {
+        // Convertir UTC a fecha local y extraer solo la fecha
+        const mealDate = new Date(meal.created_at).toISOString().split('T')[0];
+        return mealDate === dateKey;
+      } catch (error) {
+        console.error('Error parsing meal date:', meal.created_at, error);
+        return false;
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching meals for history:', error);
+    return [];
+  }
 }
 
 export function HistoryPage({ profile }: Props) {
@@ -27,18 +59,27 @@ export function HistoryPage({ profile }: Props) {
   }, [profile.name]);
 
   useEffect(() => {
-    // Always filter meals when selectedDate or allMeals change
-    filterMealsByDate(selectedDate);
-  }, [selectedDate, allMeals]);
+    // Always filter meals when selectedDate changes
+    if (selectedDate) {
+      filterMealsBySelectedDate(selectedDate);
+    }
+  }, [selectedDate]);
 
   const fetchUserHistory = async () => {
     try {
-      const data = await getUserHistory(profile.name);
+      const response = await fetch(`${config.api.baseUrl}/user-history?user=${encodeURIComponent(profile.name)}`);
+      
+      if (!response.ok) {
+        console.error('Error fetching user history:', response.statusText);
+        return;
+      }
+
+      const data = await response.json();
       setAllMeals(data);
       
       // Create set of dates that have data, converting UTC to local timezone
       const dates = new Set(
-        data.map(meal => {
+        data.map((meal: DetectedFood) => {
           try {
             const utcDate = parseISO(meal.created_at);
             const localDate = utcToZonedTime(utcDate, timeZone);
@@ -58,26 +99,13 @@ export function HistoryPage({ profile }: Props) {
     }
   };
 
-  const filterMealsByDate = (date: Date) => {
-    // Convert selected date to string format
-    const selectedDateString = format(date, 'yyyy-MM-dd');
+  const filterMealsBySelectedDate = async (date: Date) => {
+    // Convert selected date to YYYY-MM-DD format
+    const dateKey = format(date, 'yyyy-MM-dd');
     
-    const filteredMeals = allMeals.filter(meal => {
-      try {
-        // Parse the UTC timestamp and convert to user's local timezone
-        const utcDate = parseISO(meal.created_at);
-        const localDate = utcToZonedTime(utcDate, timeZone);
-        
-        // Convert to string and compare
-        const mealDateString = format(localDate, 'yyyy-MM-dd');
-        
-        return mealDateString === selectedDateString;
-      } catch (error) {
-        console.error('Error parsing date for filtering:', meal.created_at, error);
-        return false;
-      }
-    });
-    setSelectedDateMeals(filteredMeals);
+    // Use the auxiliary function to get meals for this specific date
+    const mealsForDate = await getMealsForHistory(profile.name, dateKey);
+    setSelectedDateMeals(mealsForDate);
   };
 
   const handleDateClick = (date: Date) => {
@@ -130,7 +158,7 @@ export function HistoryPage({ profile }: Props) {
         const formattedDate = format(currentDay, 'd');
         const dateKey = format(currentDay, 'yyyy-MM-dd');
         const hasData = datesWithData.has(dateKey);
-        const isSelected = isSameDay(currentDay, selectedDate);
+        const isSelected = selectedDate && isSameDay(currentDay, selectedDate);
         const isToday = isSameDay(currentDay, new Date());
         const isCurrentMonth = isSameMonth(currentDay, monthStart);
 
