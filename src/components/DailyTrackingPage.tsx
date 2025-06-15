@@ -30,17 +30,12 @@ export function DailyTrackingPage({ profile }: Props) {
   useEffect(() => {
     fetchUserHistory();
     fetchRecommendations();
-  }, [profile.id]);
+  }, [profile.name]); // Changed from profile.id to profile.name
 
   // Filter meals whenever selectedDate changes
   useEffect(() => {
     filterMealsByDate();
-  }, [selectedDate]);
-
-  // Filter meals whenever allMeals is updated
-  useEffect(() => {
-    filterMealsByDate();
-  }, [allMeals]);
+  }, [selectedDate, allMeals]);
 
   const fetchUserHistory = async () => {
     try {
@@ -50,7 +45,14 @@ export function DailyTrackingPage({ profile }: Props) {
       
       // Create set of dates that have data for calendar indicators
       const dates = new Set(
-        data.map(meal => format(parseISO(meal.created_at), 'yyyy-MM-dd'))
+        data.map(meal => {
+          try {
+            return format(parseISO(meal.created_at), 'yyyy-MM-dd');
+          } catch (error) {
+            console.error('Error parsing date for calendar:', meal.created_at, error);
+            return null;
+          }
+        }).filter(Boolean) as string[]
       );
       setDatesWithData(dates);
     } catch (error) {
@@ -67,9 +69,11 @@ export function DailyTrackingPage({ profile }: Props) {
       return;
     }
 
+    const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
     const filteredMeals = allMeals.filter(meal => {
       try {
-        return isSameDay(selectedDate, parseISO(meal.created_at));
+        const mealDateStr = format(parseISO(meal.created_at), 'yyyy-MM-dd');
+        return selectedDateStr === mealDateStr;
       } catch (error) {
         console.error('Error parsing date:', meal.created_at, error);
         return false;
@@ -82,9 +86,10 @@ export function DailyTrackingPage({ profile }: Props) {
   const fetchRecommendations = async () => {
     try {
       const data = await getRecommendations(profile.id);
-      setRecommendations(data.recommendations);
+      setRecommendations(data.recommendations || []);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
+      setRecommendations([]);
     }
   };
 
@@ -551,7 +556,7 @@ export function DailyTrackingPage({ profile }: Props) {
                 {meals.map((meal, index) => (
                   <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-800">{meal.name}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">{meal.food_name}</h3>
                       <span className="text-sm text-gray-500">
                         {format(parseISO(meal.created_at), 'HH:mm', { locale: es })}
                       </span>

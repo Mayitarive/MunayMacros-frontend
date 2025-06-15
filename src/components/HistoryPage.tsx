@@ -63,6 +63,7 @@ export function HistoryPage({ profile }: Props) {
 
     const filteredMeals = allMeals.filter(meal => {
       try {
+        // Parse the UTC timestamp and convert to user's local timezone
         const utcDate = parseISO(meal.created_at);
         const localDate = utcToZonedTime(utcDate, timeZone);
         const localDateStr = format(localDate, 'yyyy-MM-dd');
@@ -272,7 +273,7 @@ export function HistoryPage({ profile }: Props) {
               {selectedDateMeals.map((meal, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="text-lg font-semibold text-gray-800">{meal.name}</h4>
+                    <h4 className="text-lg font-semibold text-gray-800">{meal.food_name}</h4>
                     <span className="text-sm text-gray-500">
                       {(() => {
                         try {
