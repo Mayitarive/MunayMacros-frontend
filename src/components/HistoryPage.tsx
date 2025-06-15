@@ -59,14 +59,19 @@ export function HistoryPage({ profile }: Props) {
   };
 
   const filterMealsByDate = (date: Date) => {
+    // Convert selected date to string format
+    const selectedDateString = format(date, 'yyyy-MM-dd');
+    
     const filteredMeals = allMeals.filter(meal => {
       try {
         // Parse the UTC timestamp and convert to user's local timezone
         const utcDate = parseISO(meal.created_at);
         const localDate = utcToZonedTime(utcDate, timeZone);
         
-        // Compare the selected date with the meal's local date
-        return isSameDay(date, localDate);
+        // Convert to string and compare
+        const mealDateString = format(localDate, 'yyyy-MM-dd');
+        
+        return mealDateString === selectedDateString;
       } catch (error) {
         console.error('Error parsing date for filtering:', meal.created_at, error);
         return false;
