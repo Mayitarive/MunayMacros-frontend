@@ -43,8 +43,8 @@ export async function getDailyLog(userId: number): Promise<DetectedFood[]> {
   return response.json();
 }
 
-export async function getUserHistory(username: string): Promise<DetectedFood[]> {
-  const response = await fetch(`${config.api.baseUrl}/user-history?user=${encodeURIComponent(username)}`);
+export async function getUserHistory(userId: number): Promise<DetectedFood[]> {
+  const response = await fetch(`${config.api.baseUrl}/user-history?user_id=${userId}`);
 
   if (!response.ok) {
     const error = await response.json();
