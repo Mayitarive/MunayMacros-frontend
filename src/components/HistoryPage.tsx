@@ -11,7 +11,7 @@ interface Props {
   profile: UserProfile;
 }
 
-// ✅ Función auxiliar exclusiva para el historial
+// ✅ Función auxiliar exclusiva para el historial - CORREGIDA
 async function getMealsForHistory(username: string, dateKey: string): Promise<DetectedFood[]> {
   try {
     const response = await fetch(
@@ -23,7 +23,8 @@ async function getMealsForHistory(username: string, dateKey: string): Promise<De
       return [];
     }
 
-    const allMeals = await response.json();
+    // ✅ CORRECCIÓN: Declarar allMeals correctamente
+    const allMeals: DetectedFood[] = await response.json();
 
     // ✅ Filtrar por fecha usando formato YYYY-MM-DD
     return allMeals.filter((meal: DetectedFood) => {
