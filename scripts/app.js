@@ -1,7 +1,14 @@
+import Utils from './utils.js';
+import Storage from './storage.js';
+import Calculator from './calculator.js';
+import RecommendationService from './recommendationService.js';
+import FoodUpload from './foodUpload.js';
+import Recommendations from './recommendations.js';
+import Charts from './charts.js';
+
 /**
  * Main application controller
  */
-
 const App = {
   /**
    * Initialize the application
@@ -440,6 +447,7 @@ const App = {
   
   /**
    * Update food recommendations based on current nutritional needs
+   * ✅ MEJORADO: Sistema dinámico que se actualiza con cada alimento registrado
    */
   updateRecommendations: async function() {
     const recommendationsContainer = document.getElementById('recommendations');
@@ -462,13 +470,13 @@ const App = {
       // Evaluate nutrition
       const evaluation = Calculator.evaluateNutrition(current, target);
       
-      // Get recommendations
+      // Get dynamic recommendations
       const { balance, recommendations } = Recommendations.getRecommendations(evaluation);
       
       // Clear the list
       recommendationsList.innerHTML = '';
       
-      // Create balance summary card
+      // Create balance summary card (SIEMPRE SE MUESTRA)
       const balanceCard = document.createElement('div');
       balanceCard.className = 'col-12 mb-4';
       
@@ -511,8 +519,20 @@ const App = {
       balanceCard.innerHTML = balanceContent;
       recommendationsList.appendChild(balanceCard);
       
-      // Add food recommendations if any
-      if (recommendations.length > 0) {
+      // ✅ DINÁMICO: Solo mostrar recomendaciones de alimentos si hay déficits
+      if (recommendations.length > 0 && balance.deficits.length > 0) {
+        // Crear título para las recomendaciones
+        const recommendationsTitle = document.createElement('div');
+        recommendationsTitle.className = 'col-12 mb-3';
+        recommendationsTitle.innerHTML = `
+          <h4 class="text-primary mb-0">
+            <i class="fas fa-lightbulb"></i> Alimentos recomendados para ti:
+          </h4>
+          <small class="text-muted">Basado en tus necesidades nutricionales actuales</small>
+        `;
+        recommendationsList.appendChild(recommendationsTitle);
+        
+        // Agregar recomendaciones de alimentos
         recommendations.forEach(rec => {
           const col = document.createElement('div');
           col.className = 'col-md-4 mb-3';
@@ -520,14 +540,31 @@ const App = {
           const card = document.createElement('div');
           card.className = 'recommendation-card';
           
+          // Determinar color del borde según el nutriente principal
+          let borderColor = 'var(--primary)';
+          if (rec.primaryNutrient === 'protein') borderColor = 'var(--success)';
+          else if (rec.primaryNutrient === 'carbs') borderColor = 'var(--secondary-dark)';
+          else if (rec.primaryNutrient === 'fat') borderColor = 'var(--alert)';
+          
+          card.style.borderLeft = `4px solid ${borderColor}`;
+          
           const content = `
             <div class="food-suggestion">
               <h5 class="mb-2">${rec.name}</h5>
               <div class="food-macros mb-2">
-                ${rec.macros.calories} kcal | ${rec.macros.protein}g proteínas | 
-                ${rec.macros.carbs}g carbohidratos | ${rec.macros.fat}g grasas
+                <span class="badge bg-primary">${rec.macros.calories} kcal</span>
+                <span class="badge bg-success">${rec.macros.protein}g proteínas</span>
+                <span class="badge bg-warning">${rec.macros.carbs}g carbohidratos</span>
+                <span class="badge bg-danger">${rec.macros.fat}g grasas</span>
               </div>
               <p class="text-muted small mb-0">${rec.description}</p>
+              <div class="mt-2">
+                <small class="text-primary">
+                  <i class="fas fa-star"></i> 
+                  Ideal para: ${rec.primaryNutrient === 'protein' ? 'Proteínas' : 
+                              rec.primaryNutrient === 'carbs' ? 'Carbohidratos' : 'Grasas saludables'}
+                </small>
+              </div>
             </div>
           `;
           
@@ -535,6 +572,17 @@ const App = {
           col.appendChild(card);
           recommendationsList.appendChild(col);
         });
+      } else if (balance.deficits.length === 0 && balance.excesses.length === 0) {
+        // Mensaje cuando todo está perfecto
+        const perfectMessage = document.createElement('div');
+        perfectMessage.className = 'col-12';
+        perfectMessage.innerHTML = `
+          <div class="alert alert-success text-center">
+            <h4><i class="fas fa-trophy"></i> ¡Excelente trabajo!</h4>
+            <p class="mb-0">Has alcanzado un balance nutricional perfecto para hoy. ¡Sigue así!</p>
+          </div>
+        `;
+        recommendationsList.appendChild(perfectMessage);
       }
       
       // Show recommendations section
